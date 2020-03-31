@@ -1,7 +1,8 @@
+import json
+import time
 from .version import VERSION
 from . import models
 import adafruit_requests as requests
-import json, time
 from typing import Optional
 
 def run_request(url, body, headers):
@@ -105,7 +106,7 @@ class CustomVisionPredictionClient():
     def __detect_image(self, project_id: str, published_name: str, image_data: bytearray, store: bool, application: Optional[str]):
         return self.__process_image(self.__detect_image_route, project_id, published_name, image_data, store, application)
 
-    def classify_image_url(self, project_id: str, published_name: str, url: str, application: Optional[str]=None):
+    def classify_image_url(self, project_id: str, published_name: str, url: str, application: Optional[str] = None):
         """Classify an image url and saves the result.
 
         :param project_id: The project id.
@@ -126,7 +127,7 @@ class CustomVisionPredictionClient():
         """
         return self.__classify_image_url(project_id, published_name, url, True, application)
 
-    def classify_image_url_with_no_store(self, project_id: str, published_name: str, url: str, application: Optional[str]=None):
+    def classify_image_url_with_no_store(self, project_id: str, published_name: str, url: str, application: Optional[str] = None):
         """Classify an image url without saving the result.
 
         :param project_id: The project id.
@@ -147,7 +148,7 @@ class CustomVisionPredictionClient():
         """
         return self.__classify_image_url(project_id, published_name, url, False, application)
 
-    def classify_image(self, project_id: str, published_name: str, image_data: bytearray, application: Optional[str]=None):
+    def classify_image(self, project_id: str, published_name: str, image_data: bytearray, application: Optional[str] = None):
         """Classify an image and saves the result.
 
         :param project_id: The project id.
@@ -169,7 +170,7 @@ class CustomVisionPredictionClient():
         """
         return self.__classify_image(project_id, published_name, image_data, True, application)
 
-    def classify_image_with_no_store(self, project_id: str, published_name: str, image_data: bytearray, application: Optional[str]=None):
+    def classify_image_with_no_store(self, project_id: str, published_name: str, image_data: bytearray, application: Optional[str] = None):
         """Classify an image without saving the result.
 
         :param project_id: The project id.
@@ -191,7 +192,7 @@ class CustomVisionPredictionClient():
         """
         return self.__classify_image(project_id, published_name, image_data, False, application)
 
-    def detect_image_url(self, project_id: str, published_name: str, url: str, application: Optional[str]=None):
+    def detect_image_url(self, project_id: str, published_name: str, url: str, application: Optional[str] = None):
         """Detect objects in an image url and saves the result.
 
         :param project_id: The project id.
@@ -212,7 +213,7 @@ class CustomVisionPredictionClient():
         """
         return self.__detect_image_url(project_id, published_name, url, True, application)
 
-    def detect_image_url_with_no_store(self, project_id: str, published_name: str, url: str, application: Optional[str]=None):
+    def detect_image_url_with_no_store(self, project_id: str, published_name: str, url: str, application: Optional[str] = None):
         """Detect objects in an image url without saving the result.
 
         :param project_id: The project id.
@@ -233,7 +234,7 @@ class CustomVisionPredictionClient():
         """
         return self.__detect_image_url(project_id, published_name, url, False, application)
 
-    def detect_image(self, project_id: str, published_name: str, image_data: bytearray, application: Optional[str]=None):
+    def detect_image(self, project_id: str, published_name: str, image_data: bytearray, application: Optional[str] = None):
         """Detect objects in an image and saves the result.
 
         :param project_id: The project id.
@@ -255,7 +256,7 @@ class CustomVisionPredictionClient():
         """
         return self.__detect_image(project_id, published_name, image_data, True, application)
 
-    def detect_image_with_no_store(self, project_id: str, published_name: str, image_data: bytearray, application: Optional[str]=None):
+    def detect_image_with_no_store(self, project_id: str, published_name: str, image_data: bytearray, application: Optional[str] = None):
         """Detect objects in an image without saving the result.
 
         :param project_id: The project id.
