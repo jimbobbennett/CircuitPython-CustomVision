@@ -17,11 +17,11 @@ def run_request(url, body, headers):
             if r.status_code != 200:
                 raise models.CustomVisionError(r.text)
             break
-        except RuntimeError as e:
-            print("Could not send data, retrying after 5 seconds: ",e)
+        except RuntimeError as runtime_error:
+            print("Could not send data, retrying after 5 seconds: ", runtime_error)
             retry = retry + 1
 
-            if (retry >= 10):
+            if retry >= 10:
                 raise
 
             time.sleep(0.5)
@@ -49,9 +49,9 @@ class CustomVisionPredictionClient():
         self.__api_key = api_key 
 
         # build the root endpoint
-        if (not endpoint.lower().startswith('https://')):
+        if not endpoint.lower().startswith('https://'):
             endpoint = 'https://' + endpoint
-        if (not endpoint.endswith('/')):
+        if not endpoint.endswith('/'):
             endpoint = endpoint + '/'
             
         self.__base_endpoint = endpoint
@@ -61,7 +61,7 @@ class CustomVisionPredictionClient():
         endpoint = self.__base_endpoint + url_format.format(projectId=project_id, publishedName=published_name)
         if not store:
             endpoint = endpoint + '/nostore'
-        if application != None:
+        if application is not None:
             application = '?' + application
             endpoint = endpoint + application
 
@@ -69,13 +69,13 @@ class CustomVisionPredictionClient():
 
     def __process_image_url(self, route: str, project_id: str, published_name: str, url: str, store: bool, application: Optional[str]):
         endpoint = self.__format_endpoint(route, project_id, published_name, store, application)
-                
-        headers={
+   
+        headers = {
             'Content-Type': 'application/json',
             'Prediction-Key': self.__api_key
         }
 
-        body = json.dumps({ 'url' : url })
+        body = json.dumps({'url' : url})
         result = run_request(endpoint, body, headers)
         result_text = result.text
 
@@ -83,8 +83,8 @@ class CustomVisionPredictionClient():
 
     def __process_image(self, route: str, project_id: str, published_name: str, image_data: bytearray, store: bool, application: Optional[str]):
         endpoint = self.__format_endpoint(route, project_id, published_name, store, application)
-        
-        headers={
+
+        headers = {
             'Content-Type': 'application/octet-stream',
             'Prediction-Key': self.__api_key
         }
