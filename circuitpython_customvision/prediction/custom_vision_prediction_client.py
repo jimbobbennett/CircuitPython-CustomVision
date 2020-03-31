@@ -1,9 +1,9 @@
 import json
 import time
+from typing import Optional
+import adafruit_requests as requests
 from .version import VERSION
 from . import models
-import adafruit_requests as requests
-from typing import Optional
 
 def run_request(url, body, headers):
     retry = 0
@@ -121,7 +121,7 @@ class CustomVisionPredictionClient():
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython-customvision.prediction.models.ImagePrediction
+         ~circuitpython_customvision.prediction.models.ImagePrediction
         :raises:
          :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
         """
@@ -142,7 +142,7 @@ class CustomVisionPredictionClient():
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython-customvision.prediction.models.ImagePrediction
+         ~circuitpython_customvision.prediction.models.ImagePrediction
         :raises:
          :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
         """
@@ -164,7 +164,7 @@ class CustomVisionPredictionClient():
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython-customvision.prediction.models.ImagePrediction
+         ~circuitpython_customvision.prediction.models.ImagePrediction
         :raises:
          :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
         """
@@ -186,7 +186,7 @@ class CustomVisionPredictionClient():
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython-customvision.prediction.models.ImagePrediction
+         ~circuitpython_customvision.prediction.models.ImagePrediction
         :raises:
          :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
         """
@@ -207,7 +207,7 @@ class CustomVisionPredictionClient():
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython-customvision.prediction.models.ImagePrediction
+         ~circuitpython_customvision.prediction.models.ImagePrediction
         :raises:
          :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
         """
@@ -228,7 +228,7 @@ class CustomVisionPredictionClient():
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython-customvision.prediction.models.ImagePrediction
+         ~circuitpython_customvision.prediction.models.ImagePrediction
         :raises:
          :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
         """
@@ -250,7 +250,7 @@ class CustomVisionPredictionClient():
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython-customvision.prediction.models.ImagePrediction
+         ~circuitpython_customvision.prediction.models.ImagePrediction
         :raises:
          :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
         """
@@ -272,7 +272,7 @@ class CustomVisionPredictionClient():
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython-customvision.prediction.models.ImagePrediction
+         ~circuitpython_customvision.prediction.models.ImagePrediction
         :raises:
          :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
         """

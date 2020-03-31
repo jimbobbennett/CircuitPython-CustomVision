@@ -1,6 +1,6 @@
+import json
 from .prediction import Prediction
 from .bounding_box import BoundingBox
-import json
 
 class ImagePrediction():
     """Result of an image prediction request.
@@ -18,7 +18,7 @@ class ImagePrediction():
     :vartype created: datetime
     :ivar predictions: List of predictions.
     :vartype predictions:
-     list[~circuitpython-customvision.prediction.models.Prediction]
+     list[~_customvision.prediction.models.Prediction]
     """
 
     def __init__(self, response) -> None:
@@ -32,14 +32,14 @@ class ImagePrediction():
         self.created = response['created']
         self.predictions = []
 
-        for p in response['predictions']:
-            b = p['boundingBox']
-            bounding_box = BoundingBox(left = b['left'], 
-                                       top = b['top'], 
-                                       width = b['width'], 
-                                       height = b['height'])
-            prediction = Prediction(probability = p['probability'],
-                                    tag_id = p['tagId'], 
-                                    tag_name = p['tagName'], 
-                                    bounding_box = bounding_box)
+        for pred in response['predictions']:
+            box = pred['boundingBox']
+            bounding_box = BoundingBox(left=box['left'],
+                                       top=box['top'],
+                                       width=box['width'],
+                                       height=box['height'])
+            prediction = Prediction(probability=pred['probability'],
+                                    tag_id=pred['tagId'],
+                                    tag_name=pred['tagName'],
+                                    bounding_box=bounding_box)
             self.predictions.append(prediction)

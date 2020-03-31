@@ -27,7 +27,7 @@ setup(
     long_description_content_type='text/x-rst',
 
     # The project's main homepage.
-    url='https://github.com/JimBobBennett/CircuitPython-CustomVision',
+    url='https://github.com/JimBobBennett/CircuitPython_CustomVision',
 
     # Author details
     author='Jim Bennett',
@@ -61,5 +61,5 @@ setup(
     # simple. Or you can use find_packages().
     # TODO: IF LIBRARY FILES ARE A PACKAGE FOLDER,
     #       CHANGE `py_modules=['...']` TO `packages=['...']`
-    py_modules=['circuitpython-customvision'],
+    packages=['circuitpython_customvision'],
 )

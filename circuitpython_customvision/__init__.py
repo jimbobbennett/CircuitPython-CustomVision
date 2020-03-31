@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 """
-`circuitpython_circuitpython-customvision`
+`circuitpython_customvision`
 ================================================================================
 
 CircuitPython library for the Azure custom vision SDK
@@ -46,4 +46,4 @@ Implementation Notes
 # imports
 
 __version__ = "0.0.0-auto.0"
-__repo__ = "https://github.com/JimBobBennett/CircuitPython_CircuitPython-CustomVision.git"
+__repo__ = "https://github.com/JimBobBennett/CircuitPython_CustomVision.git"

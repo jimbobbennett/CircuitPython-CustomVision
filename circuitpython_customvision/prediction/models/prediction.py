@@ -14,7 +14,7 @@ class Prediction():
     :vartype tag_name: str
     :ivar bounding_box: Bounding box of the prediction.
     :vartype bounding_box:
-     ~circuitpython-customvision.prediction.models.BoundingBox
+     ~circuitpython_customvision.prediction.models.BoundingBox
     """
 
     def __init__(self, probability: float, tag_id: str, tag_name: str, bounding_box: BoundingBox) -> None:
