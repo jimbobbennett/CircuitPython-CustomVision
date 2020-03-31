@@ -46,14 +46,14 @@ class CustomVisionPredictionClient():
     def __init__(
             self, api_key, endpoint):
 
-        self.__api_key = api_key 
+        self.__api_key = api_key
 
         # build the root endpoint
         if not endpoint.lower().startswith('https://'):
             endpoint = 'https://' + endpoint
         if not endpoint.endswith('/'):
             endpoint = endpoint + '/'
-            
+
         self.__base_endpoint = endpoint
         self.api_version = VERSION
 
@@ -69,7 +69,7 @@ class CustomVisionPredictionClient():
 
     def __process_image_url(self, route: str, project_id: str, published_name: str, url: str, store: bool, application: Optional[str]):
         endpoint = self.__format_endpoint(route, project_id, published_name, store, application)
-   
+
         headers = {
             'Content-Type': 'application/json',
             'Prediction-Key': self.__api_key
