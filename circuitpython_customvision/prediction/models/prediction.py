@@ -1,6 +1,7 @@
 from .bounding_box import BoundingBox
 
-class Prediction():
+
+class Prediction:
     """Prediction result.
 
     Variables are only populated by the server, and will be ignored when

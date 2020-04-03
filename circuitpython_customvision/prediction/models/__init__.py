@@ -14,9 +14,4 @@ from .prediction import Prediction
 from .image_prediction import ImagePrediction
 from .customvision_error import CustomVisionError
 
-__all__ = [
-    'BoundingBox',
-    'Prediction',
-    'ImagePrediction',
-    'CustomVisionError'
-]
+__all__ = ["BoundingBox", "Prediction", "ImagePrediction", "CustomVisionError"]

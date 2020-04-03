@@ -12,6 +12,6 @@
 from .custom_vision_prediction_client import CustomVisionPredictionClient
 from .version import VERSION
 
-__all__ = ['CustomVisionPredictionClient']
+__all__ = ["CustomVisionPredictionClient"]
 
 __version__ = VERSION

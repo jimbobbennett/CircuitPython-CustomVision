@@ -5,6 +5,7 @@ import adafruit_requests as requests
 from .version import VERSION
 from . import models
 
+
 def run_request(url, body, headers):
     retry = 0
     r = None
@@ -29,7 +30,8 @@ def run_request(url, body, headers):
 
     return r
 
-class CustomVisionPredictionClient():
+
+class CustomVisionPredictionClient:
     """CustomVisionPredictionClient
 
     :param api_key: API key.
@@ -38,21 +40,20 @@ class CustomVisionPredictionClient():
     :type endpoint: str
     """
 
-    __classify_image_url_route = 'customvision/v3.0/Prediction/{projectId}/classify/iterations/{publishedName}/url'
-    __classify_image_route = 'customvision/v3.0/Prediction/{projectId}/classify/iterations/{publishedName}/image'
-    __detect_image_url_route = 'customvision/v3.0/Prediction/{projectId}/classify/iterations/{publishedName}/url'
-    __detect_image_route = 'customvision/v3.0/Prediction/{projectId}/classify/iterations/{publishedName}/image'
+    __classify_image_url_route = "customvision/v3.0/Prediction/{projectId}/classify/iterations/{publishedName}/url"
+    __classify_image_route = "customvision/v3.0/Prediction/{projectId}/classify/iterations/{publishedName}/image"
+    __detect_image_url_route = "customvision/v3.0/Prediction/{projectId}/classify/iterations/{publishedName}/url"
+    __detect_image_route = "customvision/v3.0/Prediction/{projectId}/classify/iterations/{publishedName}/image"
 
-    def __init__(
-            self, api_key, endpoint):
+    def __init__(self, api_key, endpoint):
 
         self.__api_key = api_key
 
         # build the root endpoint
-        if not endpoint.lower().startswith('https://'):
-            endpoint = 'https://' + endpoint
-        if not endpoint.endswith('/'):
-            endpoint = endpoint + '/'
+        if not endpoint.lower().startswith("https://"):
+            endpoint = "https://" + endpoint
+        if not endpoint.endswith("/"):
+            endpoint = endpoint + "/"
 
         self.__base_endpoint = endpoint
         self.api_version = VERSION
@@ -60,9 +61,9 @@ class CustomVisionPredictionClient():
     def __format_endpoint(self, url_format: str, project_id: str, published_name: str, store: bool, application: Optional[str]):
         endpoint = self.__base_endpoint + url_format.format(projectId=project_id, publishedName=published_name)
         if not store:
-            endpoint = endpoint + '/nostore'
+            endpoint = endpoint + "/nostore"
         if application is not None:
-            application = '?' + application
+            application = "?" + application
             endpoint = endpoint + application
 
         return endpoint
@@ -70,24 +71,20 @@ class CustomVisionPredictionClient():
     def __process_image_url(self, route: str, project_id: str, published_name: str, url: str, store: bool, application: Optional[str]):
         endpoint = self.__format_endpoint(route, project_id, published_name, store, application)
 
-        headers = {
-            'Content-Type': 'application/json',
-            'Prediction-Key': self.__api_key
-        }
+        headers = {"Content-Type": "application/json", "Prediction-Key": self.__api_key}
 
-        body = json.dumps({'url' : url})
+        body = json.dumps({"url": url})
         result = run_request(endpoint, body, headers)
         result_text = result.text
 
         return models.ImagePrediction(result_text)
 
-    def __process_image(self, route: str, project_id: str, published_name: str, image_data: bytearray, store: bool, application: Optional[str]):
+    def __process_image(
+        self, route: str, project_id: str, published_name: str, image_data: bytearray, store: bool, application: Optional[str]
+    ):
         endpoint = self.__format_endpoint(route, project_id, published_name, store, application)
 
-        headers = {
-            'Content-Type': 'application/octet-stream',
-            'Prediction-Key': self.__api_key
-        }
+        headers = {"Content-Type": "application/octet-stream", "Prediction-Key": self.__api_key}
 
         result = run_request(endpoint, image_data, headers)
         result_text = result.text

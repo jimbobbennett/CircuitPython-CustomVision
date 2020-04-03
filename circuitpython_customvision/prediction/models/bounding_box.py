@@ -1,4 +1,4 @@
-class BoundingBox():
+class BoundingBox:
     """Bounding box that defines a region of an image.
 
     All required parameters must be populated in order to send to Azure.
