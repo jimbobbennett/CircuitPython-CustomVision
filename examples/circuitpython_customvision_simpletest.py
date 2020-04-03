@@ -1,4 +1,4 @@
-from circuitpython_customvision.prediction.custom_vision_prediction_client import CustomVisionPredictionClient
+from circuitpython_customvision import CustomVisionPredictionClient
 
 client = CustomVisionPredictionClient("api_key", "endpoint")
 

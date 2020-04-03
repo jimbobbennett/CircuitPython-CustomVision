@@ -9,8 +9,103 @@ import json
 import time
 from typing import Optional
 import adafruit_requests as requests
-from .version import VERSION
-from . import models
+
+VERSION = "3.0"
+
+
+class CustomVisionError(Exception):
+    """
+    An error from the custom vision service
+    """
+
+    def __init__(self, message):
+        super(CustomVisionError, self).__init__(message)
+        self.message = message
+
+
+class BoundingBox:
+    """Bounding box that defines a region of an image.
+
+    All required parameters must be populated in order to send to Azure.
+
+    :param left: Required. Coordinate of the left boundary.
+    :type left: float
+    :param top: Required. Coordinate of the top boundary.
+    :type top: float
+    :param width: Required. Width.
+    :type width: float
+    :param height: Required. Height.
+    :type height: float
+    """
+
+    def __init__(self, left: float, top: float, width: float, height: float) -> None:
+        self.left = left
+        self.top = top
+        self.width = width
+        self.height = height
+
+
+class Prediction:
+    """Prediction result.
+
+    Variables are only populated by the server, and will be ignored when
+    sending a request.
+
+    :ivar probability: Probability of the tag.
+    :vartype probability: float
+    :ivar tag_id: Id of the predicted tag.
+    :vartype tag_id: str
+    :ivar tag_name: Name of the predicted tag.
+    :vartype tag_name: str
+    :ivar bounding_box: Bounding box of the prediction.
+    :vartype bounding_box:
+     ~circuitpython_customvision.prediction.models.BoundingBox
+    """
+
+    def __init__(self, probability: float, tag_id: str, tag_name: str, bounding_box: BoundingBox) -> None:
+        self.probability = probability
+        self.tag_id = tag_id
+        self.tag_name = tag_name
+        self.bounding_box = bounding_box
+
+
+class ImagePrediction:
+    """Result of an image prediction request.
+
+    Variables are only populated by the server, and will be ignored when
+    sending a request.
+
+    :ivar id: Prediction Id.
+    :vartype id: str
+    :ivar project: Project Id.
+    :vartype project: str
+    :ivar iteration: Iteration Id.
+    :vartype iteration: str
+    :ivar created: Date this prediction was created.
+    :vartype created: datetime
+    :ivar predictions: List of predictions.
+    :vartype predictions:
+     list[~_customvision.prediction.models.Prediction]
+    """
+
+    def __init__(self, response) -> None:
+
+        if not isinstance(response, dict):
+            response = json.loads(response)
+
+        self.prediction_id = response["id"]
+        self.project = response["project"]
+        self.iteration = response["iteration"]
+        self.created = response["created"]
+        self.predictions = []
+
+        for pred in response["predictions"]:
+            box = pred["boundingBox"]
+            bounding_box = BoundingBox(left=box["left"], top=box["top"], width=box["width"], height=box["height"])
+            prediction = Prediction(
+                probability=pred["probability"], tag_id=pred["tagId"], tag_name=pred["tagName"], bounding_box=bounding_box
+            )
+            self.predictions.append(prediction)
 
 
 def __run_request(url, body, headers):
@@ -23,7 +118,7 @@ def __run_request(url, body, headers):
             r = requests.post(url, data=body, headers=headers)
 
             if r.status_code != 200:
-                raise models.CustomVisionError(r.text)
+                raise CustomVisionError(r.text)
             break
         except RuntimeError as runtime_error:
             print("Could not send data, retrying after 5 seconds: ", runtime_error)
@@ -84,7 +179,7 @@ class CustomVisionPredictionClient:
         result = __run_request(endpoint, body, headers)
         result_text = result.text
 
-        return models.ImagePrediction(result_text)
+        return ImagePrediction(result_text)
 
     def __process_image(
         self, route: str, project_id: str, published_name: str, image_data: bytearray, store: bool, application: Optional[str]
@@ -96,7 +191,7 @@ class CustomVisionPredictionClient:
         result = __run_request(endpoint, image_data, headers)
         result_text = result.text
 
-        return models.ImagePrediction(result_text)
+        return ImagePrediction(result_text)
 
     def __classify_image_url(self, project_id: str, published_name: str, url: str, store: bool, application: Optional[str]):
         return self.__process_image_url(self.__classify_image_url_route, project_id, published_name, url, store, application)
