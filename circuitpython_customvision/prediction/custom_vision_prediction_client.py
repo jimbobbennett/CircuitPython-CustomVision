@@ -1,5 +1,8 @@
 """
 Prediction client for the Azure Custom Vision service
+======================================================
+
+Use this with models generated using https://customvision.ai
 """
 
 import json
