@@ -49,5 +49,5 @@ setup(
     # simple. Or you can use find_packages().
     # TODO: IF LIBRARY FILES ARE A PACKAGE FOLDER,
     #       CHANGE `py_modules=['...']` TO `packages=['...']`
-    packages=find_packages(),
+    packages=find_packages(include=['circuitpython_customvision', 'circuitpython_customvision.*']),
 )
