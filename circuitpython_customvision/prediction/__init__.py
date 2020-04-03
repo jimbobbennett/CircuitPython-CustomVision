@@ -9,6 +9,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
+"""
+CircuitPython Azure Custom Vision prediction library
+"""
+
 from .custom_vision_prediction_client import CustomVisionPredictionClient
 from .version import VERSION
 

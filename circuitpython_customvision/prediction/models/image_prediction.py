@@ -1,3 +1,6 @@
+"""Result of an image prediction request.
+"""
+
 import json
 from .prediction import Prediction
 from .bounding_box import BoundingBox

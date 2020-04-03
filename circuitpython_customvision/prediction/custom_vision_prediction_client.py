@@ -1,3 +1,7 @@
+"""
+Prediction client for the Azure Custom Vision service
+"""
+
 import json
 import time
 from typing import Optional
@@ -6,7 +10,7 @@ from .version import VERSION
 from . import models
 
 
-def run_request(url, body, headers):
+def __run_request(url, body, headers):
     retry = 0
     r = None
 
@@ -74,7 +78,7 @@ class CustomVisionPredictionClient:
         headers = {"Content-Type": "application/json", "Prediction-Key": self.__api_key}
 
         body = json.dumps({"url": url})
-        result = run_request(endpoint, body, headers)
+        result = __run_request(endpoint, body, headers)
         result_text = result.text
 
         return models.ImagePrediction(result_text)
@@ -86,7 +90,7 @@ class CustomVisionPredictionClient:
 
         headers = {"Content-Type": "application/octet-stream", "Prediction-Key": self.__api_key}
 
-        result = run_request(endpoint, image_data, headers)
+        result = __run_request(endpoint, image_data, headers)
         result_text = result.text
 
         return models.ImagePrediction(result_text)

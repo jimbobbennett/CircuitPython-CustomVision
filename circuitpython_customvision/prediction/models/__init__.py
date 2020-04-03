@@ -9,6 +9,10 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
+"""
+Models for the predictions made by the Azure Custom Vision service
+"""
+
 from .bounding_box import BoundingBox
 from .prediction import Prediction
 from .image_prediction import ImagePrediction

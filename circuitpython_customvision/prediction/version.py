@@ -9,4 +9,8 @@
 # regenerated.
 # --------------------------------------------------------------------------
 
+"""
+The version of the Custom Vision API to use
+"""
+
 VERSION = "3.0"

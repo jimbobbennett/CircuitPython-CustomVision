@@ -1,3 +1,8 @@
+"""
+An error from the custom vision service
+"""
+
+
 class CustomVisionError(Exception):
     """
     An error from the custom vision service

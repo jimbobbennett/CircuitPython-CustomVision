@@ -1,3 +1,7 @@
+"""Bounding box that defines a region of an image.
+"""
+
+
 class BoundingBox:
     """Bounding box that defines a region of an image.
 

@@ -1,3 +1,6 @@
+"""Prediction result.
+"""
+
 from .bounding_box import BoundingBox
 
 
