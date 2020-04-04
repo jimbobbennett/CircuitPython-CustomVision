@@ -7,8 +7,9 @@ Use this with models generated using https://customvision.ai
 
 import json
 import time
-from typing import Optional
+import gc
 import adafruit_requests as requests
+import adafruit_logging as logging
 
 VERSION = "3.0"
 
@@ -111,17 +112,19 @@ class ImagePrediction:
 def __run_request(url, body, headers):
     retry = 0
     r = None
+    logger = logging.getLogger("log")
 
     while retry < 10:
+        gc.collect()
         try:
-            print("Trying to send...")
+            logger.debug("Trying to send...")
             r = requests.post(url, data=body, headers=headers)
 
             if r.status_code != 200:
                 raise CustomVisionError(r.text)
             break
         except RuntimeError as runtime_error:
-            print("Could not send data, retrying after 5 seconds: ", runtime_error)
+            logger.info("Could not send data, retrying after 5 seconds: " + str(runtime_error))
             retry = retry + 1
 
             if retry >= 10:
@@ -130,6 +133,7 @@ def __run_request(url, body, headers):
             time.sleep(0.5)
             continue
 
+    gc.collect()
     return r
 
 
@@ -142,10 +146,10 @@ class CustomVisionPredictionClient:
     :type endpoint: str
     """
 
-    __classify_image_url_route = "customvision/v3.0/Prediction/{projectId}/classify/iterations/{publishedName}/url"
-    __classify_image_route = "customvision/v3.0/Prediction/{projectId}/classify/iterations/{publishedName}/image"
-    __detect_image_url_route = "customvision/v3.0/Prediction/{projectId}/classify/iterations/{publishedName}/url"
-    __detect_image_route = "customvision/v3.0/Prediction/{projectId}/classify/iterations/{publishedName}/image"
+    __classify_image_url_route = "customvision/v" + VERSION + "/Prediction/{projectId}/classify/iterations/{publishedName}/url"
+    __classify_image_route = "customvision/v" + VERSION + "/Prediction/{projectId}/classify/iterations/{publishedName}/image"
+    __detect_image_url_route = "customvision/v" + VERSION + "/Prediction/{projectId}/detect/iterations/{publishedName}/url"
+    __detect_image_route = "customvision/v" + VERSION + "/Prediction/{projectId}/detect/iterations/{publishedName}/image"
 
     def __init__(self, api_key, endpoint):
 
@@ -160,7 +164,7 @@ class CustomVisionPredictionClient:
         self.__base_endpoint = endpoint
         self.api_version = VERSION
 
-    def __format_endpoint(self, url_format: str, project_id: str, published_name: str, store: bool, application: Optional[str]):
+    def __format_endpoint(self, url_format: str, project_id: str, published_name: str, store: bool, application):
         endpoint = self.__base_endpoint + url_format.format(projectId=project_id, publishedName=published_name)
         if not store:
             endpoint = endpoint + "/nostore"
@@ -170,7 +174,7 @@ class CustomVisionPredictionClient:
 
         return endpoint
 
-    def __process_image_url(self, route: str, project_id: str, published_name: str, url: str, store: bool, application: Optional[str]):
+    def __process_image_url(self, route: str, project_id: str, published_name: str, url: str, store: bool, application):
         endpoint = self.__format_endpoint(route, project_id, published_name, store, application)
 
         headers = {"Content-Type": "application/json", "Prediction-Key": self.__api_key}
@@ -181,9 +185,7 @@ class CustomVisionPredictionClient:
 
         return ImagePrediction(result_text)
 
-    def __process_image(
-        self, route: str, project_id: str, published_name: str, image_data: bytearray, store: bool, application: Optional[str]
-    ):
+    def __process_image(self, route: str, project_id: str, published_name: str, image_data: bytearray, store: bool, application):
         endpoint = self.__format_endpoint(route, project_id, published_name, store, application)
 
         headers = {"Content-Type": "application/octet-stream", "Prediction-Key": self.__api_key}
@@ -193,19 +195,19 @@ class CustomVisionPredictionClient:
 
         return ImagePrediction(result_text)
 
-    def __classify_image_url(self, project_id: str, published_name: str, url: str, store: bool, application: Optional[str]):
+    def __classify_image_url(self, project_id: str, published_name: str, url: str, store: bool, application):
         return self.__process_image_url(self.__classify_image_url_route, project_id, published_name, url, store, application)
 
-    def __classify_image(self, project_id: str, published_name: str, image_data: bytearray, store: bool, application: Optional[str]):
+    def __classify_image(self, project_id: str, published_name: str, image_data: bytearray, store: bool, application):
         return self.__process_image(self.__classify_image_route, project_id, published_name, image_data, store, application)
 
-    def __detect_image_url(self, project_id: str, published_name: str, url: str, store: bool, application: Optional[str]):
+    def __detect_image_url(self, project_id: str, published_name: str, url: str, store: bool, application):
         return self.__process_image_url(self.__detect_image_url_route, project_id, published_name, url, store, application)
 
-    def __detect_image(self, project_id: str, published_name: str, image_data: bytearray, store: bool, application: Optional[str]):
+    def __detect_image(self, project_id: str, published_name: str, image_data: bytearray, store: bool, application):
         return self.__process_image(self.__detect_image_route, project_id, published_name, image_data, store, application)
 
-    def classify_image_url(self, project_id: str, published_name: str, url: str, application: Optional[str] = None):
+    def classify_image_url(self, project_id: str, published_name: str, url: str, application=None) -> ImagePrediction:
         """Classify an image url and saves the result.
 
         :param project_id: The project id.
@@ -226,7 +228,7 @@ class CustomVisionPredictionClient:
         """
         return self.__classify_image_url(project_id, published_name, url, True, application)
 
-    def classify_image_url_with_no_store(self, project_id: str, published_name: str, url: str, application: Optional[str] = None):
+    def classify_image_url_with_no_store(self, project_id: str, published_name: str, url: str, application=None) -> ImagePrediction:
         """Classify an image url without saving the result.
 
         :param project_id: The project id.
@@ -247,7 +249,7 @@ class CustomVisionPredictionClient:
         """
         return self.__classify_image_url(project_id, published_name, url, False, application)
 
-    def classify_image(self, project_id: str, published_name: str, image_data: bytearray, application: Optional[str] = None):
+    def classify_image(self, project_id: str, published_name: str, image_data: bytearray, application=None) -> ImagePrediction:
         """Classify an image and saves the result.
 
         :param project_id: The project id.
@@ -269,7 +271,9 @@ class CustomVisionPredictionClient:
         """
         return self.__classify_image(project_id, published_name, image_data, True, application)
 
-    def classify_image_with_no_store(self, project_id: str, published_name: str, image_data: bytearray, application: Optional[str] = None):
+    def classify_image_with_no_store(
+        self, project_id: str, published_name: str, image_data: bytearray, application=None
+    ) -> ImagePrediction:
         """Classify an image without saving the result.
 
         :param project_id: The project id.
@@ -291,7 +295,7 @@ class CustomVisionPredictionClient:
         """
         return self.__classify_image(project_id, published_name, image_data, False, application)
 
-    def detect_image_url(self, project_id: str, published_name: str, url: str, application: Optional[str] = None):
+    def detect_image_url(self, project_id: str, published_name: str, url: str, application=None) -> ImagePrediction:
         """Detect objects in an image url and saves the result.
 
         :param project_id: The project id.
@@ -312,7 +316,7 @@ class CustomVisionPredictionClient:
         """
         return self.__detect_image_url(project_id, published_name, url, True, application)
 
-    def detect_image_url_with_no_store(self, project_id: str, published_name: str, url: str, application: Optional[str] = None):
+    def detect_image_url_with_no_store(self, project_id: str, published_name: str, url: str, application=None) -> ImagePrediction:
         """Detect objects in an image url without saving the result.
 
         :param project_id: The project id.
@@ -333,7 +337,7 @@ class CustomVisionPredictionClient:
         """
         return self.__detect_image_url(project_id, published_name, url, False, application)
 
-    def detect_image(self, project_id: str, published_name: str, image_data: bytearray, application: Optional[str] = None):
+    def detect_image(self, project_id: str, published_name: str, image_data: bytearray, application=None) -> ImagePrediction:
         """Detect objects in an image and saves the result.
 
         :param project_id: The project id.
@@ -355,7 +359,7 @@ class CustomVisionPredictionClient:
         """
         return self.__detect_image(project_id, published_name, image_data, True, application)
 
-    def detect_image_with_no_store(self, project_id: str, published_name: str, image_data: bytearray, application: Optional[str] = None):
+    def detect_image_with_no_store(self, project_id: str, published_name: str, image_data: bytearray, application=None) -> ImagePrediction:
         """Detect objects in an image without saving the result.
 
         :param project_id: The project id.
