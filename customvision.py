@@ -109,7 +109,7 @@ class ImagePrediction:
             self.predictions.append(prediction)
 
 
-def __run_request(url, body, headers):
+def __run_request_with_retry(url, body, headers):
     retry = 0
     r = None
     logger = logging.getLogger("log")
@@ -180,7 +180,7 @@ class CustomVisionPredictionClient:
         headers = {"Content-Type": "application/json", "Prediction-Key": self.__api_key}
 
         body = json.dumps({"url": url})
-        result = __run_request(endpoint, body, headers)
+        result = __run_request_with_retry(endpoint, body, headers)
         result_text = result.text
 
         return ImagePrediction(result_text)
@@ -190,7 +190,7 @@ class CustomVisionPredictionClient:
 
         headers = {"Content-Type": "application/octet-stream", "Prediction-Key": self.__api_key}
 
-        result = __run_request(endpoint, image_data, headers)
+        result = __run_request_with_retry(endpoint, image_data, headers)
         result_text = result.text
 
         return ImagePrediction(result_text)

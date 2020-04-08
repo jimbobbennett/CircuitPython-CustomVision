@@ -17,8 +17,15 @@ Introduction
     :target: https://github.com/psf/black
     :alt: Code Style: Black
 
-CircuitPython library for the Azure custom vision SDK
+CircuitPython prediction library for the Azure custom vision service.
 
+To use this library, you will need to create a custom vision project at [CustomVision.ai](https://customvision.ai?WT.mc_id=circuitpythoncustomvisionprediction-github-jabenn).
+Once you have your project, you will need to train either an image classification model, or an object detection model. You can then use this library to make predictions against this model.
+
+You can read more on how to do this in the Microsoft docs:
+
+* [Train an image classifier](https://docs.microsoft.com/azure/cognitive-services/custom-vision-service/getting-started-build-a-classifier?WT.mc_id=circuitpythoncustomvisionprediction-github-jabenn)
+* [Train an object detection model](https://docs.microsoft.com/azure/cognitive-services/custom-vision-service/get-started-build-detector?WT.mc_id=circuitpythoncustomvisionprediction-github-jabenn)
 
 Dependencies
 =============
