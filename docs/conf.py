@@ -38,7 +38,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "CircuitPython-CustomVision Library"
+project = "CircuitPython-AzureCustomVision-Prediction Library"
 copyright = "2020 Jim Bennett"
 author = "Jim Bennett"
 
@@ -114,7 +114,7 @@ html_static_path = ["_static"]
 html_favicon = "_static/favicon.ico"
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "Circuitpython-customvisionLibrarydoc"
+htmlhelp_basename = "Circuitpython-azurecustomvision-predictionLibrarydoc"
 
 # -- Options for LaTeX output ---------------------------------------------
 
@@ -137,14 +137,28 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "CircuitPython-CustomVisionLibrary.tex", "CircuitPython-CustomVision Library Documentation", author, "manual"),
+    (
+        master_doc,
+        "CircuitPython-AzureCustomVision-PredictionLibrary.tex",
+        "CircuitPython-AzureCustomVision-Prediction Library Documentation",
+        author,
+        "manual",
+    ),
 ]
 
 # -- Options for manual page output ---------------------------------------
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "CircuitPython-CustomVisionlibrary", "CircuitPython-CustomVision Library Documentation", [author], 1)]
+man_pages = [
+    (
+        master_doc,
+        "CircuitPython-AzureCustomVision-Predictionlibrary",
+        "CircuitPython-AzureCustomVision-Prediction Library Documentation",
+        [author],
+        1,
+    )
+]
 
 # -- Options for Texinfo output -------------------------------------------
 
@@ -154,10 +168,10 @@ man_pages = [(master_doc, "CircuitPython-CustomVisionlibrary", "CircuitPython-Cu
 texinfo_documents = [
     (
         master_doc,
-        "CircuitPython-CustomVisionLibrary",
-        "CircuitPython-CustomVision Library Documentation",
+        "CircuitPython-AzureCustomVision-PredictionLibrary",
+        "CircuitPython-AzureCustomVision-Prediction Library Documentation",
         author,
-        "CircuitPython-CustomVisionLibrary",
+        "CircuitPython-AzureCustomVision-PredictionLibrary",
         "One line description of project.",
         "Miscellaneous",
     ),

@@ -1,6 +1,8 @@
 """
-Prediction client for the Azure Custom Vision service
+`azurecustomvision_prediction`
 ======================================================
+
+Prediction client for the Azure Custom Vision service
 
 Use this with models generated using https://customvision.ai
 """
@@ -45,6 +47,9 @@ class BoundingBox:
         self.width = width
         self.height = height
 
+    def __str__(self):
+        return "Top: " + str(self.top) + ", Left: " + str(self.left) + ", Width: " + str(self.width) + ", Height: " + str(self.height)
+
 
 class Prediction:
     """Prediction result.
@@ -58,12 +63,12 @@ class Prediction:
     :vartype tag_id: str
     :ivar tag_name: Name of the predicted tag.
     :vartype tag_name: str
-    :ivar bounding_box: Bounding box of the prediction.
+    :ivar bounding_box: Bounding box of the prediction. This is None for image classification
     :vartype bounding_box:
-     ~circuitpython_customvision.prediction.models.BoundingBox
+     ~circuitpython_azurecustomvision_prediction.BoundingBox
     """
 
-    def __init__(self, probability: float, tag_id: str, tag_name: str, bounding_box: BoundingBox) -> None:
+    def __init__(self, probability: float, tag_id: str, tag_name: str, bounding_box) -> None:
         self.probability = probability
         self.tag_id = tag_id
         self.tag_name = tag_name
@@ -86,11 +91,10 @@ class ImagePrediction:
     :vartype created: datetime
     :ivar predictions: List of predictions.
     :vartype predictions:
-     list[~_customvision.prediction.models.Prediction]
+     list[~circuitpython_azurecustomvision_prediction.Prediction]
     """
 
     def __init__(self, response) -> None:
-
         if not isinstance(response, dict):
             response = json.loads(response)
 
@@ -101,15 +105,20 @@ class ImagePrediction:
         self.predictions = []
 
         for pred in response["predictions"]:
-            box = pred["boundingBox"]
-            bounding_box = BoundingBox(left=box["left"], top=box["top"], width=box["width"], height=box["height"])
+            if "boundingBox" in pred:
+                box = pred["boundingBox"]
+                bounding_box = BoundingBox(left=box["left"], top=box["top"], width=box["width"], height=box["height"])
+            else:
+                bounding_box = None
             prediction = Prediction(
                 probability=pred["probability"], tag_id=pred["tagId"], tag_name=pred["tagName"], bounding_box=bounding_box
             )
             self.predictions.append(prediction)
 
+        self.predictions.sort(key=lambda x: x.probability, reverse=True)
 
-def __run_request_with_retry(url, body, headers):
+
+def _run_request_with_retry(url, body, headers):
     retry = 0
     r = None
     logger = logging.getLogger("log")
@@ -140,20 +149,20 @@ def __run_request_with_retry(url, body, headers):
 class CustomVisionPredictionClient:
     """CustomVisionPredictionClient
 
-    :param api_key: API key.
-    :type api_key: str
+    :param prediction_key: Prediction key.
+    :type prediction_key: str
     :param endpoint: Supported Cognitive Services endpoints.
     :type endpoint: str
     """
 
-    __classify_image_url_route = "customvision/v" + VERSION + "/Prediction/{projectId}/classify/iterations/{publishedName}/url"
-    __classify_image_route = "customvision/v" + VERSION + "/Prediction/{projectId}/classify/iterations/{publishedName}/image"
-    __detect_image_url_route = "customvision/v" + VERSION + "/Prediction/{projectId}/detect/iterations/{publishedName}/url"
-    __detect_image_route = "customvision/v" + VERSION + "/Prediction/{projectId}/detect/iterations/{publishedName}/image"
+    _classify_image_url_route = "customvision/v" + VERSION + "/Prediction/{projectId}/classify/iterations/{publishedName}/url"
+    _classify_image_route = "customvision/v" + VERSION + "/Prediction/{projectId}/classify/iterations/{publishedName}/image"
+    _detect_image_url_route = "customvision/v" + VERSION + "/Prediction/{projectId}/detect/iterations/{publishedName}/url"
+    _detect_image_route = "customvision/v" + VERSION + "/Prediction/{projectId}/detect/iterations/{publishedName}/image"
 
-    def __init__(self, api_key, endpoint):
+    def __init__(self, prediction_key, endpoint):
 
-        self.__api_key = api_key
+        self._prediction_key = prediction_key
 
         # build the root endpoint
         if not endpoint.lower().startswith("https://"):
@@ -161,11 +170,11 @@ class CustomVisionPredictionClient:
         if not endpoint.endswith("/"):
             endpoint = endpoint + "/"
 
-        self.__base_endpoint = endpoint
+        self._base_endpoint = endpoint
         self.api_version = VERSION
 
-    def __format_endpoint(self, url_format: str, project_id: str, published_name: str, store: bool, application):
-        endpoint = self.__base_endpoint + url_format.format(projectId=project_id, publishedName=published_name)
+    def _format_endpoint(self, url_format: str, project_id: str, published_name: str, store: bool, application):
+        endpoint = self._base_endpoint + url_format.format(projectId=project_id, publishedName=published_name)
         if not store:
             endpoint = endpoint + "/nostore"
         if application is not None:
@@ -174,38 +183,40 @@ class CustomVisionPredictionClient:
 
         return endpoint
 
-    def __process_image_url(self, route: str, project_id: str, published_name: str, url: str, store: bool, application):
-        endpoint = self.__format_endpoint(route, project_id, published_name, store, application)
+    def _process_image_url(self, route: str, project_id: str, published_name: str, url: str, store: bool, application):
+        endpoint = self._format_endpoint(route, project_id, published_name, store, application)
 
-        headers = {"Content-Type": "application/json", "Prediction-Key": self.__api_key}
+        headers = {"Content-Type": "application/json", "Prediction-Key": self._prediction_key}
 
         body = json.dumps({"url": url})
-        result = __run_request_with_retry(endpoint, body, headers)
+        result = _run_request_with_retry(endpoint, body, headers)
         result_text = result.text
 
         return ImagePrediction(result_text)
 
-    def __process_image(self, route: str, project_id: str, published_name: str, image_data: bytearray, store: bool, application):
-        endpoint = self.__format_endpoint(route, project_id, published_name, store, application)
+    def _process_image(self, route: str, project_id: str, published_name: str, image_data: bytearray, store: bool, application):
+        endpoint = self._format_endpoint(route, project_id, published_name, store, application)
 
-        headers = {"Content-Type": "application/octet-stream", "Prediction-Key": self.__api_key}
+        headers = {"Content-Type": "application/octet-stream", "Prediction-Key": self._prediction_key}
 
-        result = __run_request_with_retry(endpoint, image_data, headers)
+        result = _run_request_with_retry(endpoint, image_data, headers)
         result_text = result.text
+
+        print(result_text)
 
         return ImagePrediction(result_text)
 
-    def __classify_image_url(self, project_id: str, published_name: str, url: str, store: bool, application):
-        return self.__process_image_url(self.__classify_image_url_route, project_id, published_name, url, store, application)
+    def _classify_image_url(self, project_id: str, published_name: str, url: str, store: bool, application):
+        return self._process_image_url(self._classify_image_url_route, project_id, published_name, url, store, application)
 
-    def __classify_image(self, project_id: str, published_name: str, image_data: bytearray, store: bool, application):
-        return self.__process_image(self.__classify_image_route, project_id, published_name, image_data, store, application)
+    def _classify_image(self, project_id: str, published_name: str, image_data: bytearray, store: bool, application):
+        return self._process_image(self._classify_image_route, project_id, published_name, image_data, store, application)
 
-    def __detect_image_url(self, project_id: str, published_name: str, url: str, store: bool, application):
-        return self.__process_image_url(self.__detect_image_url_route, project_id, published_name, url, store, application)
+    def _detect_image_url(self, project_id: str, published_name: str, url: str, store: bool, application):
+        return self._process_image_url(self._detect_image_url_route, project_id, published_name, url, store, application)
 
-    def __detect_image(self, project_id: str, published_name: str, image_data: bytearray, store: bool, application):
-        return self.__process_image(self.__detect_image_route, project_id, published_name, image_data, store, application)
+    def _detect_image(self, project_id: str, published_name: str, image_data: bytearray, store: bool, application):
+        return self._process_image(self._detect_image_route, project_id, published_name, image_data, store, application)
 
     def classify_image_url(self, project_id: str, published_name: str, url: str, application=None) -> ImagePrediction:
         """Classify an image url and saves the result.
@@ -222,11 +233,11 @@ class CustomVisionPredictionClient:
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython_customvision.prediction.models.ImagePrediction
+         ~circuitpython_azurecustomvision_prediction.ImagePrediction
         :raises:
-         :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
+         :class:`CustomVisionError<circuitpython_azurecustomvision_prediction.CustomVisionErrorException>`
         """
-        return self.__classify_image_url(project_id, published_name, url, True, application)
+        return self._classify_image_url(project_id, published_name, url, True, application)
 
     def classify_image_url_with_no_store(self, project_id: str, published_name: str, url: str, application=None) -> ImagePrediction:
         """Classify an image url without saving the result.
@@ -243,11 +254,11 @@ class CustomVisionPredictionClient:
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython_customvision.prediction.models.ImagePrediction
+         ~circuitpython_azurecustomvision_predictionImagePrediction
         :raises:
-         :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
+         :class:`CustomVisionError<circuitpython_azurecustomvision_prediction.CustomVisionErrorException>`
         """
-        return self.__classify_image_url(project_id, published_name, url, False, application)
+        return self._classify_image_url(project_id, published_name, url, False, application)
 
     def classify_image(self, project_id: str, published_name: str, image_data: bytearray, application=None) -> ImagePrediction:
         """Classify an image and saves the result.
@@ -265,11 +276,11 @@ class CustomVisionPredictionClient:
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython_customvision.prediction.models.ImagePrediction
+         ~circuitpython_azurecustomvision_prediction.ImagePrediction
         :raises:
-         :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
+         :class:`CustomVisionError<circuitpython_azurecustomvision_prediction.CustomVisionErrorException>`
         """
-        return self.__classify_image(project_id, published_name, image_data, True, application)
+        return self._classify_image(project_id, published_name, image_data, True, application)
 
     def classify_image_with_no_store(
         self, project_id: str, published_name: str, image_data: bytearray, application=None
@@ -289,11 +300,11 @@ class CustomVisionPredictionClient:
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython_customvision.prediction.models.ImagePrediction
+         ~circuitpython_azurecustomvision_prediction.ImagePrediction
         :raises:
-         :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
+         :class:`CustomVisionError<circuitpython_azurecustomvision_prediction.CustomVisionErrorException>`
         """
-        return self.__classify_image(project_id, published_name, image_data, False, application)
+        return self._classify_image(project_id, published_name, image_data, False, application)
 
     def detect_image_url(self, project_id: str, published_name: str, url: str, application=None) -> ImagePrediction:
         """Detect objects in an image url and saves the result.
@@ -310,11 +321,11 @@ class CustomVisionPredictionClient:
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython_customvision.prediction.models.ImagePrediction
+         ~circuitpython_azurecustomvision_prediction.ImagePrediction
         :raises:
-         :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
+         :class:`CustomVisionError<circuitpython_azurecustomvision_prediction.CustomVisionErrorException>`
         """
-        return self.__detect_image_url(project_id, published_name, url, True, application)
+        return self._detect_image_url(project_id, published_name, url, True, application)
 
     def detect_image_url_with_no_store(self, project_id: str, published_name: str, url: str, application=None) -> ImagePrediction:
         """Detect objects in an image url without saving the result.
@@ -331,11 +342,11 @@ class CustomVisionPredictionClient:
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython_customvision.prediction.models.ImagePrediction
+         ~circuitpython_azurecustomvision_prediction.ImagePrediction
         :raises:
-         :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
+         :class:`CustomVisionError<circuitpython_azurecustomvision_prediction.CustomVisionErrorException>`
         """
-        return self.__detect_image_url(project_id, published_name, url, False, application)
+        return self._detect_image_url(project_id, published_name, url, False, application)
 
     def detect_image(self, project_id: str, published_name: str, image_data: bytearray, application=None) -> ImagePrediction:
         """Detect objects in an image and saves the result.
@@ -353,11 +364,11 @@ class CustomVisionPredictionClient:
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython_customvision.prediction.models.ImagePrediction
+         ~circuitpython_azurecustomvision_prediction.ImagePrediction
         :raises:
-         :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
+         :class:`CustomVisionError<circuitpython_azurecustomvision_prediction.CustomVisionErrorException>`
         """
-        return self.__detect_image(project_id, published_name, image_data, True, application)
+        return self._detect_image(project_id, published_name, image_data, True, application)
 
     def detect_image_with_no_store(self, project_id: str, published_name: str, image_data: bytearray, application=None) -> ImagePrediction:
         """Detect objects in an image without saving the result.
@@ -375,8 +386,8 @@ class CustomVisionPredictionClient:
         :type application: str
         :return: ImagePrediction
         :rtype:
-         ~circuitpython_customvision.prediction.models.ImagePrediction
+         ~circuitpython_azurecustomvision_prediction.ImagePrediction
         :raises:
-         :class:`CustomVisionError<circuitpython.customvision.prediction.models.CustomVisionErrorException>`
+         :class:`CustomVisionError<circuitpython_azurecustomvision_prediction.CustomVisionErrorException>`
         """
-        return self.__detect_image(project_id, published_name, image_data, False, application)
+        return self._detect_image(project_id, published_name, image_data, False, application)

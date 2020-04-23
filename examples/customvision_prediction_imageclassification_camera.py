@@ -1,3 +1,4 @@
+import time
 import board
 import busio
 from digitalio import DigitalInOut
@@ -66,17 +67,63 @@ print("Connected to WiFi!")
 # To train an object detector, follow these instructions: https://aka.ms/AA88llc
 #
 # Once you have your model trained, publish an iteration of it
-# you will need your API key, endpoint, project id and published iteration name
-# Add these to your secrets.py file as api_key, endpoint, project_id, published_name
+# you will need your Prediction key, endpoint, project id and published iteration name
+# Add these to your secrets.py file as prediction_key, endpoint, project_id, published_name
 
 from azurecustomvision_prediction import CustomVisionPredictionClient
 
-# Create the prediction client
-client = CustomVisionPredictionClient(secrets["api_key"], secrets["endpoint"])
+client = CustomVisionPredictionClient(secrets["prediction_key"], secrets["endpoint"])
 
-# Do an image classification
-# Update the URL to point to your image URL
-image_prediction = client.classify_image_url(secrets["project_id"], secrets["published_name"], "<url of image>")
+# Capture an image from a VC0706 camera:
+import adafruit_vc0706
+
+# Set up the camera
+uart = busio.UART(board.TX, board.RX, baudrate=115200, timeout=0.25)
+vc0706 = adafruit_vc0706.VC0706(uart)
+vc0706.baudrate = 115200
+vc0706.image_size = adafruit_vc0706.IMAGE_SIZE_320x240
+
+# Count down to taking the picture
+print("Taking a picture in 3 seconds...")
+time.sleep(1)
+print("Taking a picture in 2 seconds...")
+time.sleep(1)
+print("Taking a picture in 1 seconds...")
+time.sleep(1)
+print("SNAP!")
+
+# Take a picture
+vc0706.take_picture()
+
+# Convert the picture to a byte array
+frame_length = vc0706.frame_length
+buffer = bytearray(frame_length)
+wcount = 0
+index = 0
+
+copy_buffer = bytearray(32)
+
+while frame_length > 0:
+    # Compute how much data is left to read as the lesser of remaining bytes
+    # or the copy buffer size (32 bytes at a time).  Buffer size MUST be
+    # a multiple of 4 and under 100.  Stick with 32!
+    to_read = min(frame_length, 32)
+
+    if to_read < 32:
+        copy_buffer = bytearray(to_read)
+
+    # Read picture data into the copy buffer.
+    if vc0706.read_picture_into(copy_buffer) == 0:
+        raise RuntimeError("Failed to read picture frame data!")
+
+    for b in copy_buffer:
+        buffer[index] = b
+        index = index + 1
+
+    frame_length -= 32
+
+# Classify the image
+image_prediction = client.classify_image(secrets["project_id"], secrets["published_name"], copy_buffer)
 
 for prediction in image_prediction.predictions:
     print("Prediction", prediction.tag_name, "with probability", str(int(prediction.probability * 100)), "%")

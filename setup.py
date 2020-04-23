@@ -18,14 +18,14 @@ with open(path.join(here, "README.rst"), encoding="utf-8") as f:
     long_description = f.read()
 
 setup(
-    name="circuitpython-customvision",
+    name="circuitpython-azurecustomvision-prediction",
     use_scm_version=True,
     setup_requires=["setuptools_scm"],
-    description="CircuitPython library for the Azure custom vision SDK",
+    description="CircuitPython prediction library for the Azure custom vision SDK",
     long_description=long_description,
     long_description_content_type="text/x-rst",
     # The project's main homepage.
-    url="https://github.com/JimBobBennett/CircuitPython_CustomVision",
+    url="https://github.com/JimBobBennett/CircuitPython_azurecustomvision_prediction",
     # Author details
     author="Jim Bennett",
     author_email="jim.bennett@microsoft.com",
@@ -44,10 +44,10 @@ setup(
         "Programming Language :: Python :: 3.5",
     ],
     # What does your project relate to?
-    keywords="adafruit blinka circuitpython micropython circuitpython-customvision azure ai " "cognitive-services custom-vision",
+    keywords="adafruit blinka circuitpython micropython circuitpython-azurecustomvision azure ai cognitive-services custom-vision",
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     # TODO: IF LIBRARY FILES ARE A PACKAGE FOLDER,
     #       CHANGE `py_modules=['...']` TO `packages=['...']`
-    py_modules=["circuitpython_customvision"],
+    py_modules=["azurecustomvision_prediction"],
 )
