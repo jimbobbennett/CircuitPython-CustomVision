@@ -19,7 +19,7 @@ Introduction
 
 CircuitPython prediction library for the Azure custom vision service.
 
-To use this library, you will need to create a custom vision project at [CustomVision.ai](https://customvision.ai?WT.mc_id=circuitpythonazurecustomvisionprediction-github-jabenn).
+To use this library, you will need to create a custom vision project at `CustomVision.ai <https://customvision.ai?WT.mc_id=circuitpythonazurecustomvisionprediction-github-jabenn>`_.
 Once you have your project, you will need to train either an image classification model, or an object detection model. You can then use this library to make predictions against this model.
 
 You can read more on how to do this in the Microsoft docs:
