@@ -190,9 +190,7 @@ class CustomVisionPredictionClient:
 
         body = json.dumps({"url": url})
         result = _run_request_with_retry(endpoint, body, headers)
-        result_text = result.text
-
-        return ImagePrediction(result_text)
+        return ImagePrediction(result.text)
 
     def _process_image(self, route: str, project_id: str, published_name: str, image_data: bytearray, store: bool, application):
         endpoint = self._format_endpoint(route, project_id, published_name, store, application)
@@ -200,11 +198,7 @@ class CustomVisionPredictionClient:
         headers = {"Content-Type": "application/octet-stream", "Prediction-Key": self._prediction_key}
 
         result = _run_request_with_retry(endpoint, image_data, headers)
-        result_text = result.text
-
-        print(result_text)
-
-        return ImagePrediction(result_text)
+        return ImagePrediction(result.text)
 
     def _classify_image_url(self, project_id: str, published_name: str, url: str, store: bool, application):
         return self._process_image_url(self._classify_image_url_route, project_id, published_name, url, store, application)
